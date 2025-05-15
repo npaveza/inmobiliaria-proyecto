@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5433
+      DB_DATABASE: inmobiliaria
+      DB_USERNAME: postgres
+      DB_PASSWORD: admin
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  db:
+    image: postgres
+    ports:
+      - "5433:5433"
+    environment:
+      POSTGRES_DB: inmobiliaria
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
