@@ -18,6 +18,8 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
+        dd($data); // 👈 detiene aquí y muestra datos en Postman
+
         $data['password'] = bcrypt($data['password']);
         $user = User::create($data);
         $token = JWTAuth::fromUser($user);
