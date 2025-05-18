@@ -23,8 +23,12 @@ class ClienteController extends Controller
             'telefono' => 'required|string'
         ]);
 
-        $cliente = Cliente::create($data);
-        return response()->json($cliente, 201);
+        try {
+            $cliente = Cliente::create($data);
+            return response()->json($cliente, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function show($id)

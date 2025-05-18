@@ -12,7 +12,7 @@ class Unidad extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-
+    protected $table = 'unidades';
     protected $fillable = [
         'numero_unidad',
         'tipo_unidad',

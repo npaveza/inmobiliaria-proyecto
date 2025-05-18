@@ -13,18 +13,20 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'nombre' => 'required|string',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
         ]);
 
-        dd($data); // 👈 detiene aquí y muestra datos en Postman
+        try {
+            $data['password'] = bcrypt($data['password']);
+            $user = User::create($data);
+            $token = JWTAuth::fromUser($user);
 
-        $data['password'] = bcrypt($data['password']);
-        $user = User::create($data);
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(['user' => $user, 'token' => $token], 201);
+            return response()->json(['user' => $user, 'token' => $token], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function login(Request $request)
