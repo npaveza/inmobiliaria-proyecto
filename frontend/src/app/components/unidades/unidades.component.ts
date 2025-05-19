@@ -92,7 +92,7 @@ export class UnidadesComponent implements OnInit {
         });
       } else {
         const unidad: Unidad = {
-          id: '', // Aquí debes generar un id si es necesario
+          id: '',
           ...unidadFormValue
         };
         this.unidadService.crearUnidad(unidad).subscribe(response => {

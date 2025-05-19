@@ -10,6 +10,36 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/register",
+     *     summary="Registrar usuario",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="name",
+     *                     type="string",
+     *                     description="Nombre del usuario"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="email",
+     *                     type="string",
+     *                     format="email",
+     *                     description="Correo electrónico del usuario"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="password",
+     *                     type="string",
+     *                     description="Contraseña del usuario"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response="201", description="Usuario registrado")
+     * )
+     */
     public function register(Request $request)
     {
         $data = $request->validate([
@@ -29,6 +59,31 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/login",
+     *     summary="Iniciar sesión",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="email",
+     *                     type="string",
+     *                     format="email",
+     *                     description="Correo electrónico del usuario"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="password",
+     *                     type="string",
+     *                     description="Contraseña del usuario"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response="200", description="Sesión iniciada")
+     * )
+     */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -40,11 +95,25 @@ class AuthController extends Controller
         return response()->json(['token' => $token]);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/me",
+     *     summary="Obtener información del usuario autenticado",
+     *     @OA\Response(response="200", description="Información del usuario")
+     * )
+     */
     public function me()
     {
         return response()->json(auth()->user());
     }
 
+    /**
+     * @OA\Post(
+     *     path="/logout",
+     *     summary="Cerrar sesión",
+     *     @OA\Response(response="200", description="Sesión cerrada")
+     * )
+     */
     public function logout()
     {
         auth()->logout();

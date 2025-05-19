@@ -8,11 +8,58 @@ use App\Models\Cliente;
 
 class ClienteController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/clientes",
+     *     summary="Listar clientes",
+     *     @OA\Response(response="200", description="Lista de clientes")
+     * )
+     */
     public function index()
     {
         return Cliente::with('unidades')->paginate(10);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/clientes",
+     *     summary="Crear cliente",
+     *     @OA\RequestBody(
+     *      @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="rut",
+     *                 type="string",
+     *                 description="RUT del cliente"
+     *             ),
+     *             @OA\Property(
+     *                 property="nombre",
+     *                 type="string",
+     *                 description="Nombre del cliente"
+     *             ),
+     *             @OA\Property(
+     *                 property="apellido",
+     *                 type="string",
+     *                 description="Apellido del cliente"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 format="email",
+     *                 description="Correo electrónico del cliente"
+     *             ),
+     *             @OA\Property(
+     *                 property="telefono",
+     *                 type="string",
+     *                 description="Teléfono del cliente"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response="201", description="Cliente creado"),
+     *     @OA\Response(response="500", description="Error interno del servidor")
+     * )
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -30,12 +77,70 @@ class ClienteController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
+    /**
+     * @OA\Get(
+     *     path="/clientes/{id}",
+     *     summary="Mostrar cliente",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(response="200", description="Cliente encontrado")
+     * )
+     */
     public function show($id)
     {
         return Cliente::with('unidades')->findOrFail($id);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/clientes/{id}",
+     *     summary="Actualizar cliente",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="rut",
+     *                     type="string",
+     *                     description="RUT del cliente"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="nombre",
+     *                     type="string",
+     *                     description="Nombre del cliente"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="apellido",
+     *                     type="string",
+     *                     description="Apellido del cliente"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="email",
+     *                     type="string",
+     *                     format="email",
+     *                     description="Correo electrónico del cliente"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="telefono",
+     *                     type="string",
+     *                     description="Teléfono del cliente"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response="200", description="Cliente actualizado")
+     * )
+     */
     public function update(Request $request, $id)
     {
         $cliente = Cliente::findOrFail($id);
@@ -52,6 +157,19 @@ class ClienteController extends Controller
         return response()->json($cliente);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/clientes/{id}",
+     *     summary="Eliminar cliente",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(response="204", description="Cliente eliminado")
+     * )
+     */
     public function destroy($id)
     {
         Cliente::destroy($id);
