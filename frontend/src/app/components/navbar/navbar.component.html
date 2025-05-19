@@ -1,31 +1,36 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Inmobiliaria</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Proyectos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Clientes</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item" *ngIf="!isLoggedIn()">
-                <a class="nav-link" href="#" (click)="openLoginModal()">Iniciar sesión</a>
-            </li>
-            <li class="nav-item" *ngIf="!isLoggedIn()">
-                <a class="nav-link" href="#" (click)="openRegisterModal()">Registrarse</a>
-            </li>
-            <li class="nav-item" *ngIf="isLoggedIn()">
-                <a class="nav-link" href="#" (click)="logout()">Cerrar sesión</a>
-            </li>
-        </ul>
+    <div class="container-fluid justify-content-center">
+        <a class="navbar-brand" href="#">Inmobiliaria</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Inicio <span class="sr-only"></span></a>
+                <li class="nav-item" *ngIf="!isLoggedIn()">
+                    <a class="nav-link" (click)="openLoginModal()">Login</a>
+                </li>
+                <li class="nav-item" *ngIf="!isLoggedIn()">
+                    <a class="nav-link" (click)="openRegisterModal()">Registrarse</a>
+                </li>
+                <li class="nav-item" *ngIf="isLoggedIn()">
+                    <a class="nav-link" href="#">Perfil</a>
+                </li>
+                <li class="nav-item" *ngIf="isLoggedIn()">
+                    <a class="nav-link" routerLink="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item" *ngIf="isLoggedIn()">
+                    <a class="nav-link" routerLink="/proyectos">Proyectos</a>
+                </li>
+                <li class="nav-item" *ngIf="isLoggedIn()">
+                    <a class="nav-link" routerLink="/unidades">Unidades</a>
+                </li>
+                <li class="nav-item" *ngIf="isLoggedIn()">
+                    <a class="nav-link" (click)="logout()">Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>

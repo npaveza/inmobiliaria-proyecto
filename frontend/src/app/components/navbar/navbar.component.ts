@@ -1,14 +1,16 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from '../../services/auth.service';
-import { LoginModalComponent } from '../login-modal/login-modal.component';
+import { LoginComponent } from '../login-modal/login-modal.component';
 import { RegisterModalComponent } from '../register-modal/register-modal.component';
 
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NgbModalModule, LoginModalComponent, RegisterModalComponent],
+  imports: [NavbarComponent, NgbModalModule, CommonModule, RouterModule, LoginComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -20,8 +22,8 @@ constructor(private authService: AuthService, private modalService: NgbModal) { 
     return this.authService.isLoggedIn();
   }
 
-  openLoginModal(): void {
-    this.modalService.open(LoginModalComponent);
+  openLoginModal() {
+    this.modalService.open(LoginComponent);
   }
 
   openRegisterModal(): void {

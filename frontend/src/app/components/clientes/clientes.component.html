@@ -1,1 +1,61 @@
-<p>clientes works!</p>
+<div class="container">
+    <h1 class="text-center">Clientes</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cliente of clientes">
+                        <td>{{ cliente.nombre }}</td>
+                        <td>{{ cliente.apellido }}</td>
+                        <td>{{ cliente.email }}</td>
+                        <td>
+                            <button class="btn btn-primary" (click)="editarCliente(cliente)">Editar</button>
+                            <button class="btn btn-danger" (click)="eliminarCliente(cliente)">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-success" (click)="mostrarFormularioCrear()">Crear Cliente</button>
+            <div *ngIf="mostrarFormulario">
+                <form [formGroup]="clienteForm">
+                    <div class="form-group">
+                        <label>RUT:</label>
+                        <input formControlName="rut" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input formControlName="nombre" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido:</label>
+                        <input formControlName="apellido" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input formControlName="email" type="email" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono:</label>
+                        <input formControlName="telefono" type="text" class="form-control">
+                    </div>
+                    <button class="btn btn-primary" (click)="crearCliente()">Guardar</button>
+                    <button class="btn btn-secondary" (click)="mostrarFormulario = false">Cancelar</button>
+                </form>
+            </div>
+            <div *ngIf="clienteCreado">
+                <p>Cliente Registrado</p>
+            </div>
+            <div *ngIf="clienteEditado">
+                <p>Cliente Editado</p>
+            </div>
+        </div>
+    </div>
+</div>

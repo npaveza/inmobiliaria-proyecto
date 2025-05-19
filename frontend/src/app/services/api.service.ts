@@ -13,6 +13,4 @@ export class ApiService {
     getProyectos() {
         return this.http.get(`${this.apiUrl}/proyectos`);
     }
-
-    // Agrega más métodos para consumir la API según sea necesario
 }
