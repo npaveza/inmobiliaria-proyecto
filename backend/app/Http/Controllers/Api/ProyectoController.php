@@ -193,4 +193,10 @@ class ProyectoController extends Controller
         Proyecto::destroy($id);
         return response()->json(null, 204);
     }
+
+    public function buscarPorRut($rut)
+    {
+        $cliente = Cliente::where('rut', $rut)->first();
+        return response()->json($cliente);
+    }
 }

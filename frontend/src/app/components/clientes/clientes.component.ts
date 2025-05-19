@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
 
 interface Cliente {
@@ -15,7 +15,7 @@ interface Cliente {
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ReactiveFormsModule],
+  imports: [CommonModule, HttpClientModule, ReactiveFormsModule, FormsModule],
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.css']
 })
@@ -119,4 +119,31 @@ export class ClientesComponent implements OnInit {
       });
     });
   }
+
+  rutBuscar = '';
+
+  /*buscarCliente(): void {
+    if (this.rutBuscar) {
+      this.clienteService.getClientePorRut(this.rutBuscar).subscribe({
+        next: (response: any) => {
+          console.log(response);
+          if (response) {
+            this.clientes = [response];
+          } else {
+            this.clientes = [];
+          }
+        },
+        error: (error: any) => {
+          console.error(error);
+          this.clientes = [];
+        }
+      });
+    } else {
+      this.clienteService.getClientes().subscribe((response: any) => {
+        console.log(response);
+        this.clientes = response.data;
+      });
+    }
+  }
+    */
 }

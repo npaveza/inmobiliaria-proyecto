@@ -17,4 +17,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('proyectos', ProyectoController::class);
     Route::apiResource('unidades', UnidadController::class);
     Route::apiResource('clientes', ClienteController::class);
+    Route::get('/clientes/buscar-por-rut/{rut}', 'ClienteController@buscarPorRut');
 });

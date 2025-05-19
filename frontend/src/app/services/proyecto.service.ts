@@ -1,5 +1,6 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -11,11 +12,16 @@ export class ProyectoService {
   private apiUrl = 'http://localhost:8000/api/proyectos';
   private token: string | null = null;
 
-  constructor(private http: HttpClient) {
-    this.token = localStorage.getItem('token');
+  constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.token = localStorage.getItem('token');
+    }
   }
 
   private getHeaders(): HttpHeaders {
+    if (isPlatformBrowser(this.platformId)) {
+      this.token = localStorage.getItem('token');
+    }
     return new HttpHeaders({
       'Authorization': `Bearer ${this.token}`,
       'Content-Type': 'application/json'

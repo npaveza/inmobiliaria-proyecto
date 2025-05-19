@@ -52,6 +52,12 @@ export class ClienteService {
     return this.http.get(`${this.apiUrl}/${rut}`, { headers: this.getHeaders() });
   }
 
+  /*
+  getClientePorRut(rut: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/buscar-por-rut/${rut}`, { headers: this.getHeaders() });
+  }
+  */
+
   crearCliente(cliente: Cliente): Observable<any> {
     return this.http.post(this.apiUrl, cliente, { headers: this.getHeaders() });
   }
