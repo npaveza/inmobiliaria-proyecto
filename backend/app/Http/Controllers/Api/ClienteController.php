@@ -63,11 +63,11 @@ class ClienteController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'rut' => 'required|string|unique:clientes,rut',
+            'rut' => 'required|string|unique:clientes,rut||regex:/^[0-9]{7,8}-[0-9kK]{1}$/',
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'email' => 'required|email|unique:clientes,email',
-            'telefono' => 'required|string'
+            'telefono' => 'required|string|max:20'
         ]);
 
         try {

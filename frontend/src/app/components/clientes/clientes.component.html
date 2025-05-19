@@ -29,6 +29,13 @@
                     <div class="form-group">
                         <label>RUT:</label>
                         <input formControlName="rut" type="text" class="form-control">
+                        <div
+                            *ngIf="clienteForm.get('rut')?.invalid && (clienteForm.get('rut')?.dirty || clienteForm.get('rut')?.touched)">
+                            <div *ngIf="clienteForm.get('rut')?.errors?.['required']" class="text-danger">El RUT es
+                                requerido</div>
+                            <div *ngIf="clienteForm.get('rut')?.errors?.['pattern']" class="text-danger">El RUT debe
+                                tener un formato válido (ej: 12345678-9)</div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Nombre:</label>
@@ -45,6 +52,13 @@
                     <div class="form-group">
                         <label>Teléfono:</label>
                         <input formControlName="telefono" type="text" class="form-control">
+                        <div
+                            *ngIf="clienteForm.get('telefono')?.invalid && (clienteForm.get('telefono')?.dirty || clienteForm.get('telefono')?.touched)">
+                            <div *ngIf="clienteForm.get('telefono')?.errors?.['required']" class="text-danger">El
+                                teléfono es requerido</div>
+                            <div *ngIf="clienteForm.get('telefono')?.errors?.['pattern']" class="text-danger">El
+                                teléfono debe tener 9 dígitos</div>
+                        </div>
                     </div>
                     <button class="btn btn-primary" (click)="crearCliente()">Guardar</button>
                     <button class="btn btn-secondary" (click)="mostrarFormulario = false">Cancelar</button>

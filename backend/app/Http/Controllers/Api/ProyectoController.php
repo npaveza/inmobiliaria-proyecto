@@ -77,7 +77,7 @@ class ProyectoController extends Controller
             'descripcion' => 'required|string',
             'ubicacion' => 'required|string',
             'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
             'estado' => 'required|string'
         ]);
 

@@ -22,11 +22,11 @@ interface Cliente {
 export class ClientesComponent implements OnInit {
   clientes: Cliente[] = [];
   clienteForm = new FormGroup({
-    rut: new FormControl('', Validators.required),
+    rut: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]{7,8}-[0-9kK]{1}$/)]),
     nombre: new FormControl('', Validators.required),
     apellido: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
-    telefono: new FormControl('', Validators.required)
+    telefono: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]{9}$/)])
   });
   mostrarFormulario = false;
   clienteCreado = false;
