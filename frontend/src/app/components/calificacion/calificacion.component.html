@@ -1,0 +1,93 @@
+<div class="container mt-4">
+    <h2 class="mb-3">Calificaciones de Clientes</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Registrar Calificación</h5>
+
+            <form [formGroup]="calificacionForm" (ngSubmit)="crearCalificacion()">
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" formControlName="cliente_id">
+                            <option value="">Seleccione...</option>
+                            <option *ngFor="let c of clientes" [value]="c.id">
+                                {{ c.nombre }} {{ c.apellido }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Contrato</label>
+                        <select class="form-select" formControlName="contrato_id">
+                            <option value="">Seleccione...</option>
+                            <option *ngFor="let ct of contratos" [value]="ct.id">
+                                Contrato #{{ ct.id }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Calificación</label>
+                        <select class="form-select" formControlName="puntuacion">
+                            <option value="1">1 ⭐</option>
+                            <option value="2">2 ⭐</option>
+                            <option value="3">3 ⭐</option>
+                            <option value="4">4 ⭐</option>
+                            <option value="5">5 ⭐</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comentario</label>
+                    <textarea formControlName="comentario" class="form-control" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Registrar</button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Calificaciones</h5>
+
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Contrato</th>
+                        <th>Puntuación</th>
+                        <th>Comentario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let c of calificaciones; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ c.cliente?.nombre }} {{ c.cliente?.apellido }}</td>
+                        <td>#{{ c.contrato_id }}</td>
+                        <td>{{ c.puntuacion }} ⭐</td>
+                        <td>{{ c.comentario }}</td>
+
+                        <td>
+                            <button class="btn btn-danger btn-sm" (click)="eliminarCalificacion(c.id)">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="calificaciones.length === 0">
+                        <td colspan="6" class="text-center text-muted">No hay calificaciones registradas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
