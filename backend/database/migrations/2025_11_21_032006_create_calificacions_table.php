@@ -10,12 +10,20 @@ return new class extends Migration
     {
         Schema::create('calificacions', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('contrato_id');
             $table->uuid('cliente_id');
             $table->uuid('unidad_id')->nullable();
             $table->uuid('proyecto_id')->nullable();
-            $table->tinyInteger('puntaje'); // 1-5
+
+            $table->tinyInteger('puntaje');
             $table->text('comentario')->nullable();
+
             $table->timestamps();
+
+            $table->foreign('contrato_id')
+                ->references('id')->on('contratos')
+                ->onDelete('cascade');
 
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('cascade');
             $table->foreign('unidad_id')->references('id')->on('unidades')->nullOnDelete();
