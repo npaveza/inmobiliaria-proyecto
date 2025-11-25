@@ -1,35 +1,67 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid justify-content-center">
-        <a class="navbar-brand" href="#">Inmobiliaria</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    <div class="container-fluid">
+
+        <!-- Marca -->
+        <a class="navbar-brand" routerLink="/">Inmobiliaria</a>
+
+        <!-- Botón responsive -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+        <!-- Menú -->
         <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
-            <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Inicio <span class="sr-only"></span></a>
-                <li class="nav-item" *ngIf="!isLoggedIn()">
-                    <a class="nav-link" (click)="openLoginModal()">Login</a>
+            <ul class="navbar-nav mb-2 mb-lg-0">
+
+                <!-- Inicio -->
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/">Inicio</a>
                 </li>
-                <li class="nav-item" *ngIf="!isLoggedIn()">
-                    <a class="nav-link" (click)="openRegisterModal()">Registrarse</a>
-                </li>
-                <!--<li class="nav-item" *ngIf="isLoggedIn()">
-                    <a class="nav-link" href="#">Perfil</a>
-                </li> -->
-                <li class="nav-item" *ngIf="isLoggedIn()">
-                    <a class="nav-link" routerLink="/clientes">Clientes</a>
-                </li>
-                <li class="nav-item" *ngIf="isLoggedIn()">
-                    <a class="nav-link" routerLink="/proyectos">Proyectos</a>
-                </li>
-                <li class="nav-item" *ngIf="isLoggedIn()">
-                    <a class="nav-link" routerLink="/unidades">Unidades</a>
-                </li>
-                <li class="nav-item" *ngIf="isLoggedIn()">
-                    <a class="nav-link" (click)="logout()">Cerrar Sesión</a>
-                </li>
+
+                <!-- SOLO si NO está logueado -->
+                <ng-container *ngIf="!isLoggedIn()">
+                    <li class="nav-item">
+                        <a class="nav-link" (click)="openLoginModal()">Login</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" (click)="openRegisterModal()">Registrarse</a>
+                    </li>
+                </ng-container>
+
+                <!-- SOLO si SÍ está logueado -->
+                <ng-container *ngIf="isLoggedIn()">
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/clientes">Clientes</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/proyectos">Proyectos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/unidades">Unidades</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/contratos">Contratos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/pagos">Pagos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/calificacion ">Calificaciones</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" (click)="logout()">Cerrar Sesión</a>
+                    </li>
+
+                </ng-container>
             </ul>
         </div>
     </div>

@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
 })
 export class CalificacionService {
 
-  private apiUrl = `${environment.apiUrl}/calificaciones`;
+  private apiUrl = `${environment.apiUrl}/calificacion`;
 
   constructor(private http: HttpClient) {}
 
