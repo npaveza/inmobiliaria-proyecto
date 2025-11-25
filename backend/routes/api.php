@@ -20,6 +20,9 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('unidades', UnidadController::class);
     Route::apiResource('clientes', ClienteController::class);
     Route::apiResource('contratos', ContratoController::class);
+    Route::get('/contratos', [ContratoController::class, 'index']);
+    Route::get('/contratos/{id}', [ContratoController::class, 'show']);
+    Route::put('/contratos/{id}', [ContratoController::class, 'update']);
     Route::apiResource('pagos', PagoController::class);
     Route::apiResource('calificaciones', CalificacionController::class);
     //Route::get('/clientes/buscar-por-rut/{rut}', 'ClienteController@buscarPorRut');

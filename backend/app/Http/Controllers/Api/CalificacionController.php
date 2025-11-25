@@ -15,6 +15,7 @@ class CalificacionController extends Controller
     public function index()
     {
         $calificaciones = Calificacion::all();
+
         return response()->json($calificaciones, 200);
     }
 
@@ -23,14 +24,20 @@ class CalificacionController extends Controller
      */
     public function store(Request $request)
     {
-        // Como aún no tienes campos, solo validamos timestamps opcionales
-        $validator = Validator::make($request->all(), []);
+        $validator = Validator::make($request->all(), [
+            'contrato_id' => 'required|exists:contratos,id',
+            'cliente_id' => 'required|exists:clientes,id',
+            'unidad_id' => 'nullable|exists:unidades,id',
+            'proyecto_id' => 'nullable|exists:proyectos,id',
+            'puntaje' => 'required|integer|min:1|max:5',
+            'comentario' => 'nullable|string',
+        ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $calificacion = Calificacion::create([]);
+        $calificacion = Calificacion::create($validator->validated());
 
         return response()->json([
             'message' => 'Calificación registrada correctamente.',
@@ -39,7 +46,7 @@ class CalificacionController extends Controller
     }
 
     /**
-     * Mostrar una calificación
+     * Mostrar una calificación por ID
      */
     public function show($id)
     {
@@ -63,13 +70,20 @@ class CalificacionController extends Controller
             return response()->json(['error' => 'Calificación no encontrada'], 404);
         }
 
-        $validator = Validator::make($request->all(), []);
+        $validator = Validator::make($request->all(), [
+            'contrato_id' => 'sometimes|exists:contratos,id',
+            'cliente_id' => 'sometimes|exists:clientes,id',
+            'unidad_id' => 'nullable|exists:unidades,id',
+            'proyecto_id' => 'nullable|exists:proyectos,id',
+            'puntaje' => 'sometimes|integer|min:1|max:5',
+            'comentario' => 'nullable|string',
+        ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $calificacion->update([]);
+        $calificacion->update($validator->validated());
 
         return response()->json([
             'message' => 'Calificación actualizada correctamente.',
@@ -78,7 +92,7 @@ class CalificacionController extends Controller
     }
 
     /**
-     * Eliminar calificación
+     * Eliminar una calificación
      */
     public function destroy($id)
     {

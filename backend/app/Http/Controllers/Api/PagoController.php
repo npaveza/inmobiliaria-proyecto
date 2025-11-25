@@ -26,17 +26,18 @@ class PagoController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'contrato_id' => 'required|exists:contratos,id',
-            'monto'       => 'required|integer|min:0',
+            'monto' => 'required|integer|min:0',
             'metodo_pago' => 'required|string|in:efectivo,transferencia,tarjeta',
-            'estado'      => 'required|string|in:pendiente,completado,fallido',
-            'fecha_pago'  => 'required|date',
+            'estado' => 'sometimes|string|in:pendiente,completado,fallido',
+            'fecha_pago' => 'required|date',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $pago = Pago::create($request->all());
+        $pago = Pago::create($validator->validated());
+
 
         return response()->json([
             'message' => 'Pago registrado correctamente.',
@@ -70,23 +71,25 @@ class PagoController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'monto'       => 'sometimes|integer|min:0',
+            'monto' => 'sometimes|integer|min:0',
             'metodo_pago' => 'sometimes|string|in:efectivo,transferencia,tarjeta',
-            'estado'      => 'sometimes|string|in:pendiente,completado,fallido',
-            'fecha_pago'  => 'sometimes|date',
+            'estado' => 'sometimes|string|in:pendiente,completado,fallido',
+            'fecha_pago' => 'sometimes|date',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $pago->update($request->all());
+        // ✔ cambio importante aquí
+        $pago->update($validator->validated());
 
         return response()->json([
             'message' => 'Pago actualizado correctamente.',
-            'pago' => $pago
+            'pago' => $pago->fresh()->load('contrato')
         ], 200);
     }
+
 
     /**
      * Eliminar un pago
@@ -105,4 +108,6 @@ class PagoController extends Controller
             'message' => 'Pago eliminado correctamente.'
         ], 200);
     }
+
+    
 }
