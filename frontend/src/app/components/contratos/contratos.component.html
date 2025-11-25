@@ -1,13 +1,11 @@
 <div class="container mt-4">
     <h2 class="mb-3">Gestión de Contratos</h2>
 
-    <!-- Crear contrato -->
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Crear Contrato</h5>
 
             <form [formGroup]="contratoForm" (ngSubmit)="crearContrato()">
-
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Cliente</label>
@@ -55,14 +53,13 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Crear Contrato
+                <button type="submit" class="btn btn-success" [disabled]="saving">
+                    {{ saving ? 'Guardando...' : 'Crear Contrato' }}
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Tabla de contratos -->
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Contratos</h5>
@@ -84,8 +81,11 @@
                 <tbody>
                     <tr *ngFor="let c of contratos; let i = index">
                         <td>{{ i + 1 }}</td>
-                        <td>{{ c.cliente?.nombre }} {{ c.cliente?.apellido }}</td>
-                        <td>{{ c.unidad?.numero_unidad }}</td>
+                        <td>
+                            {{ c.cliente?.nombre ? (c.cliente.nombre + ' ' + (c.cliente.apellido || '')) : (c.cliente_id
+                            || '—') }}
+                        </td>
+                        <td>{{ c.unidad?.numero_unidad ? c.unidad.numero_unidad : (c.unidad_id || '—') }}</td>
                         <td>{{ c.estado }}</td>
                         <td>{{ c.tipo_contrato }}</td>
                         <td>{{ c.fecha_inicio | date:'dd/MM/yyyy' }}</td>

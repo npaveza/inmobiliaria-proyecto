@@ -10,7 +10,7 @@ import { RegisterModalComponent } from '../register-modal/register-modal.compone
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NgbModalModule, CommonModule, RouterModule, LoginComponent],
+  imports: [NgbModalModule, CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })

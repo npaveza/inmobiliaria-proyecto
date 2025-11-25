@@ -1,23 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subscription, forkJoin } from 'rxjs';
-import { ClienteService } from '../../services/cliente.service';
+import { Subscription } from 'rxjs';
+import { ContratoService } from '../../services/contrato.service';
 import { PagoService } from '../../services/pago.service';
-import { UnidadService } from '../../services/unidad.service';
 
 @Component({
   selector: 'app-pagos',
   standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './pagos.component.html',
-  imports: [CommonModule, ReactiveFormsModule]
+  styleUrls: ['./pagos.component.css']
 })
 export class PagosComponent implements OnInit, OnDestroy {
-
-  pagoForm: FormGroup;
   pagos: any[] = [];
-  clientes: any[] = [];
-  unidades: any[] = [];
+  contratos: any[] = [];
+  pagoForm: FormGroup;
 
   loading = false;
   saving = false;
@@ -26,53 +24,52 @@ export class PagosComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private fb: FormBuilder,
     private pagoService: PagoService,
-    private clienteService: ClienteService,
-    private unidadService: UnidadService
+    private contratoService: ContratoService,
+    private fb: FormBuilder
   ) {
     this.pagoForm = this.fb.group({
-      cliente_id: ['', Validators.required],
-      unidad_id: ['', Validators.required],
-      metodo: ['', Validators.required],
+      contrato_id: ['', Validators.required],
       monto: ['', [Validators.required, Validators.min(0)]],
       fecha_pago: ['', Validators.required],
+      metodo_pago: ['transferencia', Validators.required],
       estado: ['pendiente', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    this.loadInitialData();
+    this.loadLookups();
     this.loadPagos();
   }
 
-  private loadInitialData() {
+  loadLookups() {
     this.loading = true;
-
-    const s = forkJoin([
-      this.clienteService.getClientes(),
-      this.unidadService.getUnidades()
-    ]).subscribe({
-      next: ([clientes, unidades]: any) => {
-        this.clientes = clientes;
-        this.unidades = unidades;
+    const s = this.contratoService.getContratos().subscribe({
+      next: (res: any) => {
+        this.contratos = Array.isArray(res) ? res : (res.data || []);
         this.loading = false;
       },
       error: err => {
         console.error(err);
-        this.error = 'Error cargando datos iniciales';
+        this.error = 'Error cargando contratos';
         this.loading = false;
       }
     });
-
     this.subs.push(s);
   }
 
   loadPagos() {
     this.loading = true;
     const s = this.pagoService.getPagos().subscribe({
-      next: (res: any) => { this.pagos = res; this.loading = false; },
-      error: err => { console.error(err); this.error = 'Error cargando pagos'; this.loading = false; }
+      next: (res: any) => {
+        this.pagos = Array.isArray(res) ? res : (res.data || []);
+        this.loading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.error = 'Error cargando pagos';
+        this.loading = false;
+      }
     });
     this.subs.push(s);
   }
@@ -87,12 +84,12 @@ export class PagosComponent implements OnInit, OnDestroy {
     const s = this.pagoService.createPago(payload).subscribe({
       next: (res: any) => {
         this.saving = false;
-        this.pagoForm.reset({ estado: 'pendiente' });
+        this.pagoForm.reset({ metodo_pago: 'transferencia', estado: 'pendiente' });
         this.loadPagos();
       },
       error: err => {
         console.error(err);
-        this.error = err?.error?.message || 'Error registrando pago';
+        this.error = err?.error?.message || 'Error creando pago';
         this.saving = false;
       }
     });
@@ -100,10 +97,13 @@ export class PagosComponent implements OnInit, OnDestroy {
   }
 
   eliminarPago(id: number) {
-    if (!confirm('¿Eliminar pago? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Eliminar pago?')) return;
     const s = this.pagoService.deletePago(id).subscribe({
-      next: () => { this.loadPagos(); },
-      error: err => { console.error(err); this.error = 'Error eliminando pago'; }
+      next: () => this.loadPagos(),
+      error: err => {
+        console.error(err);
+        this.error = 'Error eliminando pago';
+      }
     });
     this.subs.push(s);
   }

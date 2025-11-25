@@ -5,15 +5,15 @@ import { Subscription, forkJoin } from 'rxjs';
 import { ClienteService } from '../../services/cliente.service';
 import { ContratoService } from '../../services/contrato.service';
 import { UnidadService } from '../../services/unidad.service';
+
 @Component({
   selector: 'app-contratos',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, CommonModule],
+  imports: [CommonModule, ReactiveFormsModule, DatePipe],
   templateUrl: './contratos.component.html',
   styleUrls: ['./contratos.component.css']
 })
 export class ContratosComponent implements OnInit, OnDestroy {
-
   contratoForm: FormGroup;
   contratos: any[] = [];
   clientes: any[] = [];
@@ -53,8 +53,8 @@ export class ContratosComponent implements OnInit, OnDestroy {
 
     const s = forkJoin([oClientes, oUnidades]).subscribe({
       next: ([clientesRes, unidadesRes]: any) => {
-        this.clientes = clientesRes;
-        this.unidades = unidadesRes;
+        this.clientes = Array.isArray(clientesRes) ? clientesRes : (clientesRes.data || []);
+        this.unidades = Array.isArray(unidadesRes) ? unidadesRes : (unidadesRes.data || []);
         this.loading = false;
       },
       error: err => {
@@ -70,8 +70,16 @@ export class ContratosComponent implements OnInit, OnDestroy {
   loadContratos() {
     this.loading = true;
     const s = this.contratoService.getContratos().subscribe({
-      next: (res: any) => { this.contratos = res; this.loading = false; },
-      error: err => { console.error(err); this.error = 'Error al cargar contratos'; this.loading = false; }
+      next: (res: any) => {
+        console.log('Contratos API response:', res);
+        this.contratos = Array.isArray(res) ? res : (res.data || []);
+        this.loading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.error = 'Error al cargar contratos';
+        this.loading = false;
+      }
     });
     this.subs.push(s);
   }

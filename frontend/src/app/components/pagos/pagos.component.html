@@ -1,46 +1,23 @@
 <div class="container mt-4">
     <h2 class="mb-3">Gestión de Pagos</h2>
 
-    <!-- Formulario para crear pagos -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Registrar Pago</h5>
-
+            <h5 class="card-title">Crear Pago</h5>
             <form [formGroup]="pagoForm" (ngSubmit)="crearPago()">
-
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label class="form-label">Cliente</label>
-                        <select formControlName="cliente_id" class="form-select">
+                        <label class="form-label">Contrato</label>
+                        <select class="form-select" formControlName="contrato_id">
                             <option value="">Seleccione...</option>
-                            <option *ngFor="let c of clientes" [value]="c.id">
-                                {{ c.nombre }} {{ c.apellido }} ({{ c.rut }})
+                            <option *ngFor="let c of contratos" [value]="c.id">
+                                {{ c.cliente?.nombre ? (c.cliente.nombre + ' ' + (c.cliente.apellido || '')) :
+                                (c.cliente_id || 'Contrato ' + c.id) }}
+                                — {{ c.unidad?.numero_unidad ? c.unidad.numero_unidad : (c.unidad_id || '') }}
                             </option>
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Unidad</label>
-                        <select formControlName="unidad_id" class="form-select">
-                            <option value="">Seleccione...</option>
-                            <option *ngFor="let u of unidades" [value]="u.id">
-                                {{ u.numero_unidad }} – {{ u.tipo_unidad }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Método de Pago</label>
-                        <select formControlName="metodo" class="form-select">
-                            <option value="">Seleccione...</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="tarjeta">Tarjeta</option>
-                            <option value="efectivo">Efectivo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Monto</label>
                         <input type="number" formControlName="monto" class="form-control" />
@@ -50,10 +27,21 @@
                         <label class="form-label">Fecha Pago</label>
                         <input type="date" formControlName="fecha_pago" class="form-control" />
                     </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Método</label>
+                        <select class="form-select" formControlName="metodo_pago">
+                            <option value="transferencia">Transferencia</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta">Tarjeta</option>
+                        </select>
+                    </div>
 
                     <div class="col-md-4">
                         <label class="form-label">Estado</label>
-                        <select formControlName="estado" class="form-select">
+                        <select class="form-select" formControlName="estado">
                             <option value="pendiente">Pendiente</option>
                             <option value="completado">Completado</option>
                             <option value="fallido">Fallido</option>
@@ -61,51 +49,45 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary" type="submit">
-                    Registrar Pago
-                </button>
+                <button class="btn btn-success" type="submit" [disabled]="saving">{{ saving ? 'Guardando...' : 'Crear
+                    Pago' }}</button>
             </form>
         </div>
     </div>
 
-    <!-- Tabla pagos -->
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title mb-3">Pagos Registrados</h5>
-
+            <h5 class="card-title">Pagos</h5>
             <table class="table table-hover table-bordered">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Cliente</th>
-                        <th>Unidad</th>
-                        <th>Método</th>
+                        <th>Contrato</th>
                         <th>Monto</th>
-                        <th>Estado</th>
                         <th>Fecha</th>
+                        <th>Método</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     <tr *ngFor="let p of pagos; let i = index">
                         <td>{{ i + 1 }}</td>
-                        <td>{{ p.cliente?.nombre }} {{ p.cliente?.apellido }}</td>
-                        <td>{{ p.unidad?.numero_unidad }}</td>
-                        <td>{{ p.metodo }}</td>
-                        <td>${{ p.monto }}</td>
-                        <td>{{ p.estado }}</td>
-                        <td>{{ p.fecha_pago | date:'dd/MM/yyyy' }}</td>
-
                         <td>
-                            <button class="btn btn-danger btn-sm" (click)="eliminarPago(p.id)">
-                                Eliminar
-                            </button>
+                            {{ p.contrato?.cliente?.nombre ? (p.contrato.cliente.nombre + ' ' +
+                            (p.contrato.cliente.apellido || '')) : (p.contrato_id || 'Contrato ' + p.contrato?.id) }}
+                        </td>
+                        <td>{{ p.monto }}</td>
+                        <td>{{ p.fecha_pago | date:'dd/MM/yyyy' }}</td>
+                        <td>{{ p.metodo_pago }}</td>
+                        <td>{{ p.estado }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" (click)="eliminarPago(p.id)">Eliminar</button>
                         </td>
                     </tr>
 
                     <tr *ngIf="pagos.length === 0">
-                        <td colspan="8" class="text-center text-muted">No hay pagos registrados</td>
+                        <td colspan="7" class="text-center text-muted">No hay pagos registrados</td>
                     </tr>
                 </tbody>
             </table>

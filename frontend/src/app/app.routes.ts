@@ -11,13 +11,21 @@ import { UnidadesComponent } from './components/unidades/unidades.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
+
     { path: 'proyectos', component: ProyectosComponent },
     { path: 'clientes', component: ClientesComponent },
     { path: 'unidades', component: UnidadesComponent },
+
     { path: 'login', component: LoginComponent },
     { path: 'registro', component: RegisterModalComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'pagos', component: PagosComponent },
-    { path: 'calificacion', component: CalificacionComponent },
-    { path: 'contratos', component: ContratosComponent }
+
+    // CONTRATOS
+    { path: 'contratos', component: ContratosComponent },
+    { path: 'contratos/:id', component: ContratosComponent },
+
+    // PAGOS
+    { path: 'contratos/:id/pagos', component: PagosComponent },
+
+    // CALIFICACIONES
+    { path: 'contratos/:id/calificacion', component: CalificacionComponent },
 ];
