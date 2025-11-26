@@ -9,23 +9,53 @@ use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\CalificacionController;
 
+/*
+|--------------------------------------------------------------------------
+| Rutas de Autenticación Pública
+|--------------------------------------------------------------------------
+*/
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+/*
+|--------------------------------------------------------------------------
+| Rutas Protegidas con JWT (auth:api)
+|--------------------------------------------------------------------------
+*/
 
-// Rutas protegidas con JWT
 Route::middleware('auth:api')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Autenticación
+    |--------------------------------------------------------------------------
+    */
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    /*
+    |--------------------------------------------------------------------------
+    | CRUD Base del Sistema
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('proyectos', ProyectoController::class);
     Route::apiResource('unidades', UnidadController::class);
     Route::apiResource('clientes', ClienteController::class);
     Route::apiResource('contratos', ContratoController::class);
+    Route::apiResource('pagos', PagoController::class);
+    Route::apiResource('calificaciones', CalificacionController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Alias opcionales (no rompen nada)
+    |--------------------------------------------------------------------------
+    */
     Route::get('/contratos', [ContratoController::class, 'index']);
     Route::get('/contratos/{id}', [ContratoController::class, 'show']);
     Route::put('/contratos/{id}', [ContratoController::class, 'update']);
-    Route::apiResource('pagos', PagoController::class);
-    Route::apiResource('calificaciones', CalificacionController::class);
-    //Route::get('/clientes/buscar-por-rut/{rut}', 'ClienteController@buscarPorRut');
-    Route::get('/clientes/buscar-por-rut/{rut}', [ClienteController::class, 'buscarPorRut']);
+    // 1. Iniciar pago (Crea pago en estado pendiente)
+    Route::post('/pagos/{id}/init', [PagoController::class, 'iniciarPago']);
+    // 2. Validar PIN
+    Route::post('/pagos/{id}/pin', [PagoController::class, 'validarPin']);
+    // 3. Generar OTP
+    Route::post('/pagos/{id}/otp', [PagoController::class, 'generarOtp']);
+    // 4. Validar OTP y autorizar pago
+    Route::post('/pagos/{id}/otp/validar', [PagoController::class, 'validarOtp']);
 
 });
