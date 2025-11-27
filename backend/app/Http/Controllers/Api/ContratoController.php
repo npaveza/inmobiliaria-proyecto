@@ -16,7 +16,7 @@ class ContratoController extends Controller
      */
     public function index()
     {
-        $contratos = Contrato::with(['cliente', 'unidad', 'pagos', 'calificacion'])->get();
+        $contratos = Contrato::with(['cliente', 'unidad', 'pagos', 'calificaciones'])->get();
 
         return response()->json($contratos, 200);
     }
@@ -74,7 +74,7 @@ class ContratoController extends Controller
      */
     public function show($id)
     {
-        $contrato = Contrato::with(['cliente', 'unidad', 'pagos', 'calificacion'])
+        $contrato = Contrato::with(['cliente', 'unidad', 'pagos', 'calificaciones'])
                             ->find($id);
 
         if (!$contrato) {
