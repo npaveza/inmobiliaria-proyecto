@@ -49,19 +49,18 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/contratos', [ContratoController::class, 'index']);
     Route::get('/contratos/{id}', [ContratoController::class, 'show']);
     Route::put('/contratos/{id}', [ContratoController::class, 'update']);
-
-    // 0. Buscar contrato por RUT (público, para Pago Cliente)
-    Route::get(
-        '/contratos/buscar-rut/{rut}',
-        [\App\Http\Controllers\Api\ConsultaContratoController::class, 'buscarPorRut']
-    );
-    // 1. Iniciar pago (Crea pago en estado pendiente)
-    Route::post('/pagos/{id}/init', [PagoController::class, 'iniciarPago']);
-    // 2. Validar PIN
-    Route::post('/pagos/{id}/pin', [PagoController::class, 'validarPin']);
-    // 3. Generar OTP
-    Route::post('/pagos/{id}/otp', [PagoController::class, 'generarOtp']);
-    // 4. Validar OTP y autorizar pago
-    Route::post('/pagos/{id}/otp/validar', [PagoController::class, 'validarOtp']);
-
 });
+
+// 0. Buscar contrato por RUT (público, para Pago Cliente)
+Route::get(
+    '/contratos/buscar-rut/{rut}',
+    [\App\Http\Controllers\Api\ConsultaContratoController::class, 'buscarPorRut']
+);
+// 1. Iniciar pago (Crea pago en estado pendiente)
+Route::post('/pagos/{id}/init', [PagoController::class, 'iniciarPago']);
+// 2. Validar PIN
+Route::post('/pagos/{id}/pin', [PagoController::class, 'validarPin']);
+// 3. Generar OTP
+Route::post('/pagos/{id}/otp', [PagoController::class, 'generarOtp']);
+// 4. Validar OTP y autorizar pago
+Route::post('/pagos/{id}/otp/validar', [PagoController::class, 'validarOtp']);

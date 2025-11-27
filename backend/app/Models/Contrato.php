@@ -39,7 +39,7 @@ class Contrato extends Model
         return $this->hasMany(Pago::class);
     }
 
-    public function calificacion()
+    public function calificaciones()
     {
         return $this->hasOne(Calificacion::class, 'contrato_id', 'id');
     }

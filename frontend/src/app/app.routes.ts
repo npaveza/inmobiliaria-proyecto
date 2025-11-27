@@ -31,4 +31,13 @@ export const routes: Routes = [
 
     // CALIFICACION
     { path: 'calificacion', component: CalificacionComponent },
+
+    // NEONPAY
+    {
+        path: 'neonpay',
+        loadComponent: () =>
+            import('./components/neonpay/neonpay.component')
+                .then(c => c.NeonpayComponent)
+    }
+
 ];
