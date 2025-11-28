@@ -1,1 +1,7 @@
-<p>result-screen works!</p>
+<div class="result-container">
+    <h2 [class.success]="result === 'approved'" [class.error]="result === 'rejected'">
+        {{ result === 'approved' ? 'Pago Aprobado!' : 'Pago Rechazado' }}
+    </h2>
+
+    <button (click)="restart()">Volver al Inicio</button>
+</div>

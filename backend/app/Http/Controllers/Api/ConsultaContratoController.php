@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class ConsultaContratoController extends Controller
 {
     /**
-     * Buscar contrato por RUT real
+     * Buscar contratos por RUT real
      * GET /api/contratos/buscar-rut/{rut}
      */
     public function buscarPorRut($rut)
@@ -17,9 +17,8 @@ class ConsultaContratoController extends Controller
         // Normalizar RUT
         $rut = strtoupper(str_replace('.', '', $rut));
 
-        // 1) Buscar cliente por RUT (tabla clientes)
+        // Buscar cliente
         $cliente = Cliente::where('rut', $rut)->first();
-
         if (!$cliente) {
             return response()->json([
                 'status' => 'not_found',
@@ -27,12 +26,12 @@ class ConsultaContratoController extends Controller
             ], 404);
         }
 
-        // 2) Buscar contratos del cliente
-        $contrato = $cliente->contratos()
-            ->with(['unidad.proyecto'])
-            ->first();
+        // Obtener TODOS los contratos del cliente con relaciones
+        $contratos = $cliente->contratos()
+            ->with(['unidad.proyecto', 'pagos', 'calificaciones'])
+            ->get();
 
-        if (!$contrato) {
+        if ($contratos->isEmpty()) {
             return response()->json([
                 'status' => 'not_found',
                 'message' => 'El cliente existe, pero no tiene contratos asociados.'
@@ -41,18 +40,9 @@ class ConsultaContratoController extends Controller
 
         return response()->json([
             'status' => 'ok',
-            'cliente' => [
-                'id' => $cliente->id,
-                'nombre' => $cliente->nombre ?? null,
-                'rut' => $cliente->rut,
-            ],
-            'contrato' => [
-                'id' => $contrato->id,
-                'estado' => $contrato->estado,
-                'tipo' => $contrato->tipo_contrato,
-                'unidad' => $contrato->unidad->nombre ?? null,
-                'proyecto' => $contrato->unidad->proyecto->nombre ?? null,
-            ]
-        ]);
+            'cliente' => $cliente,
+            'contratos' => $contratos
+        ], 200);
     }
+
 }

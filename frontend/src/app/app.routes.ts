@@ -4,6 +4,7 @@ import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login-modal/login-modal.component';
 import { RegisterModalComponent } from './components/register-modal/register-modal.component';
 
+import { BuscarContratoComponent } from './components/buscar-contrato/buscar-contrato.component';
 import { CalificacionComponent } from './components/calificacion/calificacion.component';
 import { ClientesComponent } from './components/clientes/clientes.component';
 import { ContratosComponent } from './components/contratos/contratos.component';
@@ -32,12 +33,16 @@ export const routes: Routes = [
     // CALIFICACION
     { path: 'calificacion', component: CalificacionComponent },
 
+    // BUSCAR CONTRATO POR RUT
+    { path: 'buscar-contrato', component: BuscarContratoComponent },
+
     // NEONPAY
     {
-        path: 'neonpay',
+        path: 'neonpay/:id',
         loadComponent: () =>
             import('./components/neonpay/neonpay.component')
                 .then(c => c.NeonpayComponent)
     }
+
 
 ];

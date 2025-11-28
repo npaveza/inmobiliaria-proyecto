@@ -82,11 +82,12 @@ class PagoController extends Controller
         // Guardamos hash y marcamos validado (guardamos en ambos nombres por compatibilidad)
         $pago->update([
             'pin_validado' => true,
+            'pin_validado_en' => now(), // <<<<<<<<<<<<<< AQUI ESTA EL FIX REAL
             'pin_hash' => Hash::make($request->pin),
-            // payload y detalles históricos
             'payload' => array_merge($pago->payload ?? [], ['pin_validado_en' => now()->toDateTimeString()]),
             'detalles' => array_merge($pago->detalles ?? [], ['pin_validado_en' => now()->toDateTimeString()]),
         ]);
+
 
         return response()->json([
             'status' => 'ok',

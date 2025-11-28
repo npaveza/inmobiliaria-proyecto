@@ -1,1 +1,9 @@
-<p>pin-screen works!</p>
+<div class="pin-container">
+    <h2>Ingrese su PIN</h2>
+
+    <input type="password" maxlength="4" [(ngModel)]="pin" class="pin-input" />
+
+    <button (click)="sendPin()" [disabled]="loading">
+        {{ loading ? 'Validando...' : 'Continuar' }}
+    </button>
+</div>
