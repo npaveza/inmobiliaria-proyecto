@@ -25,11 +25,9 @@ import { ResultScreenComponent } from './result-screen/result-screen.component';
 })
 export class NeonpayComponent {
 
-  sessionId: number | null = null;
-  paymentId: number | null = null;
-
+  contratoId: number | null = null; // id del contrato (ruta)
+  paymentId: number | null = null;  // id del pago (pago.id devuelto por init)
   step = 1; // 1: card → 2: PIN → 3: OTP → 4: Resultado
-
   paymentResult: any = null;
 
   constructor(
@@ -38,48 +36,39 @@ export class NeonpayComponent {
   ) { }
 
   ngOnInit() {
-    // Obtener el parámetro ID desde /neonpay/:id
-    const contratoId = Number(this.route.snapshot.paramMap.get('id'));
-    console.log("Contrato recibido:", contratoId);
-
-    this.sessionId = contratoId;
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.contratoId = isNaN(id) ? null : id;
+    console.log('Neonpay: contratoId =', this.contratoId);
   }
 
-  /**
-   * PASO 1 → SE RECIBE EL ID DEL PAGO CREADO
-   */
+  // recibe el paymentId (pago.id) desde NeonCard
   onPaymentStarted(pagoId: number) {
-    console.log("ID de pago recibido desde NeonCard:", pagoId);
+    console.log('onPaymentStarted -> pagoId =', pagoId);
     this.paymentId = pagoId;
-    this.step = 2; // mostrar pantalla PIN
+    this.step = 2;
   }
 
-  /**
-   * PASO 2 → PIN validado → avanzar a OTP
-   */
-  onPinValidated(success: boolean) {
-    if (success) {
-      console.log("PIN validado correctamente");
+  onPinValidated(ok: boolean) {
+    console.log('onPinValidated =>', ok);
+    if (ok) {
       this.step = 3;
+    } else {
+      this.paymentResult = { status: 'rejected', message: 'PIN incorrecto' };
+      this.step = 4;
     }
   }
 
-  /**
-   * PASO 3 → OTP validado → mostrar resultado final
-   */
-  onOtpValidated(result: any) {
-    console.log("OTP validado. Resultado:", result);
-    this.paymentResult = result;
+  onOtpValidated(result: 'approved' | 'rejected') {
+    this.paymentResult = result === 'approved'
+      ? { status: 'approved' }
+      : { status: 'rejected', message: 'OTP inválido' };
     this.step = 4;
   }
 
-  /**
-   * Reiniciar todo el flujo
-   */
   restart() {
     this.step = 1;
-    this.paymentResult = null;
     this.paymentId = null;
+    this.paymentResult = null;
   }
 
 }

@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class PinScreenComponent {
 
-  @Input() sessionId!: number;
+  @Input() sessionId!: number; // aquí sessionId debe ser paymentId (pago.id)
   @Output() pinValidated = new EventEmitter<boolean>();
 
   pin = '';
@@ -29,10 +29,14 @@ export class PinScreenComponent {
     }).subscribe({
       next: res => {
         this.loading = false;
-        this.pinValidated.emit(res.valid === true);
+
+        // Backend devuelve { status: 'ok', message: '...', pago: {...} }
+        const ok = (res && (res.status === 'ok' || (res.pago && res.pago.pin_validado === true)));
+        this.pinValidated.emit(Boolean(ok));
       },
       error: err => {
         this.loading = false;
+        // opcional: mostrar error
         this.pinValidated.emit(false);
       }
     });

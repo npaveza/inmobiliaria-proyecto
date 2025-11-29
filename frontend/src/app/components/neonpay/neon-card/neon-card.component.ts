@@ -9,20 +9,31 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class NeonCardComponent {
 
-  @Input() sessionId!: number;
+  @Input() contratoId!: number;             // <-- ahora lo recibe del padre
   @Output() paymentStarted = new EventEmitter<number>();
   loading = false;
 
   constructor(private http: HttpClient) {}
 
   iniciarPago() {
+    if (!this.contratoId) {
+      console.error('No se recibió contratoId en NeonCard');
+      return;
+    }
+
     this.loading = true;
 
-    this.http.post<any>(`http://127.0.0.1:8000/api/pagos/${this.sessionId}/init`, {})
+    this.http.post<any>(`http://127.0.0.1:8000/api/pagos/${this.contratoId}/init`, {})
       .subscribe({
         next: res => {
           this.loading = false;
-          this.paymentStarted.emit(res.pago.id); // enviamos el ID real del pago
+          // backend responde { status: 'ok', message: 'Pago iniciado', pago: { id, ... } }
+          const pagoId = res?.pago?.id ?? null;
+          if (!pagoId) {
+            console.error('Respuesta inválida al iniciar pago', res);
+            return;
+          }
+          this.paymentStarted.emit(pagoId); // enviamos el ID real del pago
         },
         error: err => {
           this.loading = false;
