@@ -2,7 +2,10 @@ version: '3.9'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-app
     ports:
       - "8000:8000"
     volumes:
@@ -19,16 +22,17 @@ services:
     command: php artisan serve --host=0.0.0.0 --port=8000
 
   db:
-    image: postgres
-    ports:
-      - "5432:5432"
+    image: postgres:15
+    container_name: backend-db
+    restart: always
     environment:
       POSTGRES_DB: inmobiliaria
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
     volumes:
-      #- postgres_data:/var/lib/postgresql/data
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
