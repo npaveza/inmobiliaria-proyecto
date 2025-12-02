@@ -28,6 +28,11 @@
                     <li class="nav-item">
                         <a class="nav-link" (click)="openRegisterModal()">Registrarse</a>
                     </li>
+                    <li class="nav-item">
+                        <a routerLink="/buscar-contrato" routerLinkActive="active" class="nav-link">
+                            Portal de Pago
+                        </a>
+                    </li>
                 </ng-container>
 
                 <!-- SOLO si SÍ está logueado -->
@@ -60,7 +65,6 @@
                     <li class="nav-item">
                         <a class="nav-link text-danger" (click)="logout()">Cerrar Sesión</a>
                     </li>
-
                 </ng-container>
             </ul>
         </div>

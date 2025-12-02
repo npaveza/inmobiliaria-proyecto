@@ -1,29 +1,38 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ClienteService } from '../../services/cliente.service';
+import { ContratoService } from '../../services/contrato.service';
+import { UnidadService } from '../../services/unidad.service';
+import { ContratosComponent } from '../contratos/contratos.component';
 
-import { ClientesComponent } from './clientes.component';
-
-describe('ClientesComponent', () => {
-  let component: ClientesComponent;
-  let fixture: ComponentFixture<ClientesComponent>;
+describe('ContratosComponent', () => {
+  let component: ContratosComponent;
+  let fixture: ComponentFixture<ContratosComponent>;
   let clienteServiceSpy: any;
+  let unidadServiceSpy: any;
+  let contratoServiceSpy: any;
 
   beforeEach(async () => {
-    clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['getClientes', 'crearCliente', 'editarCliente', 'eliminarCliente']);
+    clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['getClientes']);
+    unidadServiceSpy = jasmine.createSpyObj('UnidadService', ['getUnidades']);
+    contratoServiceSpy = jasmine.createSpyObj('ContratoService', ['getContratos', 'createContrato', 'deleteContrato']);
+
     clienteServiceSpy.getClientes.and.returnValue(of({ data: [] }));
+    unidadServiceSpy.getUnidades.and.returnValue(of({ data: [] }));
+    contratoServiceSpy.getContratos.and.returnValue(of({ data: [] }));
 
     await TestBed.configureTestingModule({
-      imports: [ClientesComponent, HttpClientTestingModule, ReactiveFormsModule],
+      imports: [ContratosComponent, HttpClientTestingModule, ReactiveFormsModule],
       providers: [
-        { provide: ClienteService, useValue: clienteServiceSpy }
+        { provide: ClienteService, useValue: clienteServiceSpy },
+        { provide: UnidadService, useValue: unidadServiceSpy },
+        { provide: ContratoService, useValue: contratoServiceSpy }
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(ClientesComponent);
+    fixture = TestBed.createComponent(ContratosComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -32,64 +41,102 @@ describe('ClientesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('debería tener un formulario inválido cuando está vacío', () => {
-    expect(component.clienteForm.valid).toBeFalsy();
+  it('should load clientes and unidades on init', () => {
+    expect(clienteServiceSpy.getClientes).toHaveBeenCalled();
+    expect(unidadServiceSpy.getUnidades).toHaveBeenCalled();
+    expect(component.clientes).toEqual([]);
+    expect(component.unidades).toEqual([]);
   });
 
-  it('debería tener un formulario válido cuando se llenan todos los campos correctamente', () => {
-    component.clienteForm.setValue({
-      rut: '12345678-5',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@example.com',
-      telefono: '912345678'
+  it('should handle error on loadLookup', () => {
+    clienteServiceSpy.getClientes.and.returnValue(throwError(() => new Error('fail')));
+    unidadServiceSpy.getUnidades.and.returnValue(throwError(() => new Error('fail')));
+    component.ngOnInit();
+    expect(component.error).toBe('Error al cargar clientes o unidades');
+  });
+
+  it('should load contratos', () => {
+    expect(contratoServiceSpy.getContratos).toHaveBeenCalled();
+    expect(component.contratos).toEqual([]);
+  });
+
+  it('should handle error when loading contratos', () => {
+    contratoServiceSpy.getContratos.and.returnValue(throwError(() => new Error('fail')));
+    component.loadContratos();
+    expect(component.error).toBe('Error al cargar contratos');
+  });
+
+  it('should create contrato when form valid', () => {
+    contratoServiceSpy.createContrato.and.returnValue(of({}));
+    contratoServiceSpy.getContratos.and.returnValue(of({ data: [] }));
+
+    component.contratoForm.setValue({
+      cliente_id: 1,
+      unidad_id: 1,
+      tipo_contrato: 'arriendo',
+      fecha_inicio: '2024-01-01',
+      fecha_fin: '2024-12-01',
+      monto_total: 500000
     });
-    expect(component.clienteForm.valid).toBeTruthy();
+
+    component.crearContrato();
+    expect(contratoServiceSpy.createContrato).toHaveBeenCalledTimes(1);
   });
 
-  it('debería mostrar el formulario cuando se llama a mostrarFormularioCrear', () => {
-    component.mostrarFormularioCrear();
-    expect(component.mostrarFormulario).toBeTruthy();
+  it('should not create contrato if form invalid', () => {
+    component.contratoForm.patchValue({ cliente_id: '' });
+    component.crearContrato();
+    expect(contratoServiceSpy.createContrato).not.toHaveBeenCalled();
   });
 
-  it('debería crear un cliente correctamente', () => {
-    clienteServiceSpy.crearCliente.and.returnValue(of({}));
-    component.clienteForm.setValue({
-      rut: '12345678-5',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@example.com',
-      telefono: '912345678'
+  it('should handle error on createContrato', () => {
+    contratoServiceSpy.createContrato.and.returnValue(throwError(() => ({ error: { message: 'fail' } })));
+    component.contratoForm.setValue({
+      cliente_id: 1,
+      unidad_id: 1,
+      tipo_contrato: 'arriendo',
+      fecha_inicio: '2024-01-01',
+      fecha_fin: '2024-12-01',
+      monto_total: 500000
     });
-    component.crearCliente();
-    expect(clienteServiceSpy.crearCliente).toHaveBeenCalledTimes(1);
+    component.crearContrato();
+    expect(component.error).toBe('fail');
   });
 
-  it('debería editar un cliente correctamente', () => {
-    const cliente = {
-      id: 1,
-      rut: '12345678-5',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@example.com',
-      telefono: '912345678'
-    };
-    component.editarCliente(cliente);
-    expect(component.modoEdicion).toBeTruthy();
-    expect(component.clienteSeleccionado).toEqual(cliente);
+  it('should delete contrato when confirm true', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    contratoServiceSpy.deleteContrato.and.returnValue(of({}));
+    contratoServiceSpy.getContratos.and.returnValue(of({ data: [] }));
+
+    component.eliminarContrato(5);
+    expect(contratoServiceSpy.deleteContrato).toHaveBeenCalledWith(5);
   });
 
-  it('debería eliminar un cliente correctamente', () => {
-    clienteServiceSpy.eliminarCliente.and.returnValue(of({}));
-    const cliente = {
-      id: 1,
-      rut: '12345678-5',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@example.com',
-      telefono: '912345678'
-    };
-    component.eliminarCliente(cliente);
-    expect(clienteServiceSpy.eliminarCliente).toHaveBeenCalledTimes(1);
+  it('should not delete contrato when confirm false', () => {
+    spyOn(window, 'confirm').and.returnValue(false);
+    contratoServiceSpy.deleteContrato.and.returnValue(of({}));
+
+    component.eliminarContrato(5);
+    expect(contratoServiceSpy.deleteContrato).not.toHaveBeenCalled();
+  });
+
+  it('should handle error on deleteContrato', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    contratoServiceSpy.deleteContrato.and.returnValue(throwError(() => new Error('fail')));
+
+    component.eliminarContrato(5);
+    expect(component.error).toBe('Error eliminando contrato');
+  });
+
+  it('should unsubscribe on destroy', () => {
+    const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+    (component as any).subs = [{ unsubscribe: unsubscribeSpy }];
+    component.ngOnDestroy();
+    expect(unsubscribeSpy).toHaveBeenCalled();
+  });
+
+  it('should validate monto_total min value', () => {
+    component.contratoForm.patchValue({ monto_total: -1 });
+    expect(component.contratoForm.valid).toBeFalse();
   });
 });

@@ -10,6 +10,7 @@ import { ClienteService } from '../../services/cliente.service';
   selector: 'app-login-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  providers: [NgbActiveModal],
   templateUrl: './login-modal.component.html',
   styleUrls: ['./login-modal.component.css']
 })

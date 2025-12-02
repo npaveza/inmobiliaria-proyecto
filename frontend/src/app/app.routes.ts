@@ -11,6 +11,7 @@ import { ContratosComponent } from './components/contratos/contratos.component';
 import { PagosComponent } from './components/pagos/pagos.component';
 import { ProyectosComponent } from './components/proyectos/proyectos.component';
 import { UnidadesComponent } from './components/unidades/unidades.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -20,18 +21,18 @@ export const routes: Routes = [
     { path: 'registro', component: RegisterModalComponent },
 
     // PÁGINAS PRINCIPALES
-    { path: 'clientes', component: ClientesComponent },
-    { path: 'unidades', component: UnidadesComponent },
-    { path: 'proyectos', component: ProyectosComponent },
+    { path: 'clientes', component: ClientesComponent, canActivate: [authGuard]  },
+    { path: 'unidades', component: UnidadesComponent, canActivate: [authGuard]  },
+    { path: 'proyectos', component: ProyectosComponent, canActivate: [authGuard]  },
 
     // CONTRATOS
-    { path: 'contratos', component: ContratosComponent },
+    { path: 'contratos', component: ContratosComponent, canActivate: [authGuard]  },
 
     // PAGOS
-    { path: 'pagos', component: PagosComponent },
+    { path: 'pagos', component: PagosComponent, canActivate: [authGuard]  },
 
     // CALIFICACION
-    { path: 'calificacion', component: CalificacionComponent },
+    { path: 'calificacion', component: CalificacionComponent, canActivate: [authGuard]  },
 
     // BUSCAR CONTRATO POR RUT
     { path: 'buscar-contrato', component: BuscarContratoComponent },
@@ -43,6 +44,4 @@ export const routes: Routes = [
             import('./components/neonpay/neonpay.component')
                 .then(c => c.NeonpayComponent)
     }
-
-
 ];
