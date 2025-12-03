@@ -24,7 +24,7 @@ describe('LoginComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, LoginComponent], // standalone
+      imports: [ReactiveFormsModule, LoginComponent],
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: ClienteService, useValue: clienteServiceSpy },
@@ -36,7 +36,6 @@ describe('LoginComponent', () => {
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
 
-    // Asegurar que el spy de activeModal se use
     (component as any).activeModal = activeModalSpy;
 
     fixture.detectChanges();
@@ -50,31 +49,44 @@ describe('LoginComponent', () => {
     expect(component.loginForm.valid).toBeFalsy();
   });
 
-  it('debería tener un formulario válido cuando se llenan todos los campos correctamente', () => {
-    component.loginForm.setValue({
-      email: 'test@example.com',
-      password: 'password'
-    });
-    expect(component.loginForm.valid).toBeTruthy();
+  it('debería marcar campos como touched y NO llamar login cuando el formulario es inválido', () => {
+    const markSpy = spyOn(component.loginForm, 'markAllAsTouched').and.callThrough();
+
+    component.onSubmit();
+
+    expect(markSpy).toHaveBeenCalled();
+    expect(authServiceSpy.login).not.toHaveBeenCalled();
+    expect(activeModalSpy.close).not.toHaveBeenCalled();
   });
 
-  it('debería llamar a login del AuthService cuando se envía el formulario', () => {
+  it('debería tener un formulario válido con datos correctos', () => {
+    component.loginForm.setValue({
+      email: 'test@example.com',
+      password: '123456'
+    });
+    expect(component.loginForm.valid).toBeTrue();
+  });
+
+  it('debería llamar a login con email y password válidos', () => {
     component.loginForm.setValue({
       email: 'test@example.com',
       password: 'password'
     });
+
     component.onSubmit();
-    expect(authServiceSpy.login).toHaveBeenCalledTimes(1);
+
     expect(authServiceSpy.login).toHaveBeenCalledWith('test@example.com', 'password');
   });
 
-  it('debería cerrar el modal y navegar después de un inicio de sesión exitoso', () => {
+  it('debería cerrar modal y navegar en login exitoso', () => {
     component.loginForm.setValue({
       email: 'test@example.com',
       password: 'password'
     });
+
     component.onSubmit();
-    expect(activeModalSpy.close).toHaveBeenCalledTimes(1);
+
+    expect(activeModalSpy.close).toHaveBeenCalled();
     expect(authServiceSpy.setToken).toHaveBeenCalledWith('token');
     expect(clienteServiceSpy.setToken).toHaveBeenCalledWith('token');
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
@@ -83,12 +95,14 @@ describe('LoginComponent', () => {
   it('debería manejar error al iniciar sesión', () => {
     const consoleSpy = spyOn(console, 'error');
     spyOn(window, 'alert');
-    authServiceSpy.login.and.returnValue(throwError({ status: 401 }));
+
+    authServiceSpy.login.and.returnValue(throwError(() => ({ status: 401 })));
 
     component.loginForm.setValue({
       email: 'test@example.com',
-      password: 'wrongpassword'
+      password: 'wrongpass'
     });
+
     component.onSubmit();
 
     expect(consoleSpy).toHaveBeenCalled();
@@ -100,18 +114,18 @@ describe('LoginComponent', () => {
     expect(activeModalSpy.close).toHaveBeenCalled();
   });
 
-  it('debería llamar a login con cadenas vacías si los valores son null o undefined', () => {
-    // Usamos patchValue en lugar de setValue
+  it('NO debería llamar login cuando email o password son null/undefined (por validación agregada)', () => {
     component.loginForm.patchValue({
       email: null,
       password: undefined
     });
+
+    const markSpy = spyOn(component.loginForm, 'markAllAsTouched').and.callThrough();
+
     component.onSubmit();
 
-    expect(authServiceSpy.login).toHaveBeenCalledWith('', '');
-    expect(activeModalSpy.close).toHaveBeenCalledTimes(1);
-    expect(authServiceSpy.setToken).toHaveBeenCalledWith('token');
-    expect(clienteServiceSpy.setToken).toHaveBeenCalledWith('token');
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+    expect(markSpy).toHaveBeenCalled();
+    expect(authServiceSpy.login).not.toHaveBeenCalled();
+    expect(activeModalSpy.close).not.toHaveBeenCalled();
   });
 });

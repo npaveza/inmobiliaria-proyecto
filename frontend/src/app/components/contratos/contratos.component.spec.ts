@@ -1,8 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { of } from 'rxjs';
-
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { of, throwError } from 'rxjs';
 import { ClienteService } from '../../services/cliente.service';
 import { ContratoService } from '../../services/contrato.service';
 import { UnidadService } from '../../services/unidad.service';
@@ -11,76 +11,145 @@ import { ContratosComponent } from './contratos.component';
 describe('ContratosComponent', () => {
   let component: ContratosComponent;
   let fixture: ComponentFixture<ContratosComponent>;
-  let clienteServiceSpy: any;
-  let unidadServiceSpy: any;
-  let contratoServiceSpy: any;
+  let contratoService: ContratoService;
+  let clienteService: ClienteService;
+  let unidadService: UnidadService;
+
+  const mockClientes = [
+    { rut: '12345678-9', nombre: 'Cliente 1', apellido: 'Apellido 1', email: 'cliente1@example.com', telefono: '123456789' }
+  ];
+
+  const mockUnidades = [
+    { id: '1', nombre: 'Unidad 1' }
+  ];
+
+  const mockContratos = [
+    { id: 1, cliente_id: '1', unidad_id: '1', tipo_contrato: 'arriendo', fecha_inicio: '2024-01-01', fecha_fin: '2024-12-31', monto_total: 1000, estado: 'activo' }
+  ];
 
   beforeEach(async () => {
-    clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['getClientes']);
-    unidadServiceSpy = jasmine.createSpyObj('UnidadService', ['getUnidades']);
-    contratoServiceSpy = jasmine.createSpyObj('ContratoService', ['getContratos', 'createContrato', 'deleteContrato']);
-
-    clienteServiceSpy.getClientes.and.returnValue(of({ data: [] }));
-    unidadServiceSpy.getUnidades.and.returnValue(of({ data: [] }));
-    contratoServiceSpy.getContratos.and.returnValue(of({ data: [] }));
-
     await TestBed.configureTestingModule({
-      imports: [
-        ContratosComponent,
-        HttpClientTestingModule,
-        ReactiveFormsModule
-      ],
-      providers: [
-        { provide: ClienteService, useValue: clienteServiceSpy },
-        { provide: UnidadService, useValue: unidadServiceSpy },
-        { provide: ContratoService, useValue: contratoServiceSpy }
-      ]
-    }).compileComponents();
+      imports: [ReactiveFormsModule, HttpClientTestingModule, CommonModule],
+      declarations: [],
+      providers: [FormBuilder, ClienteService, ContratoService, UnidadService]
+    })
+      .compileComponents();
 
     fixture = TestBed.createComponent(ContratosComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    contratoService = TestBed.inject(ContratoService);
+    clienteService = TestBed.inject(ClienteService);
+    unidadService = TestBed.inject(UnidadService);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('debería cargar clientes y unidades al iniciar', () => {
-    expect(clienteServiceSpy.getClientes).toHaveBeenCalledTimes(1);
-    expect(unidadServiceSpy.getUnidades).toHaveBeenCalledTimes(1);
-    expect(component.clientes).toEqual([]);
-    expect(component.unidades).toEqual([]);
-  });
-
-  it('debería cargar contratos correctamente', () => {
-    expect(contratoServiceSpy.getContratos).toHaveBeenCalledTimes(1);
-    expect(component.contratos).toEqual([]);
-  });
-
-  it('debería crear un contrato', () => {
-    contratoServiceSpy.createContrato.and.returnValue(of({}));
-
-    component.contratoForm.setValue({
-      cliente_id: 1,
-      unidad_id: 1,
-      tipo_contrato: 'arriendo',
-      fecha_inicio: '2024-01-01',
-      fecha_fin: '2024-12-01',
-      monto_total: 500000
+  describe('ngOnInit', () => {
+    beforeEach(() => {
+      spyOn(clienteService, 'getClientes').and.returnValue(of(mockClientes));
+      spyOn(unidadService, 'getUnidades').and.returnValue(of(mockUnidades));
+      spyOn(contratoService, 'getContratos').and.returnValue(of(mockContratos));
+      fixture.detectChanges();
     });
 
-    component.crearContrato();
+    it('should load clientes and unidades on init', fakeAsync(() => {
+      tick();
+      expect(component.clientes).toEqual(mockClientes);
+      expect(component.unidades).toEqual(mockUnidades);
+    }));
 
-    expect(contratoServiceSpy.createContrato).toHaveBeenCalledTimes(1);
+    it('should load contratos on init', fakeAsync(() => {
+      tick();
+      expect(component.contratos).toEqual(mockContratos);
+    }));
   });
 
-  it('debería eliminar un contrato', () => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    contratoServiceSpy.deleteContrato.and.returnValue(of({}));
+  describe('crearContrato', () => {
+    it('should create contrato', fakeAsync(() => {
+      const createContratoSpy = spyOn(contratoService, 'createContrato').and.returnValue(of(mockContratos[0]));
+      spyOn(clienteService, 'getClientes').and.returnValue(of(mockClientes));
+      spyOn(unidadService, 'getUnidades').and.returnValue(of(mockUnidades));
+      spyOn(contratoService, 'getContratos').and.returnValue(of(mockContratos));
 
-    component.eliminarContrato(5);
+      // NO llamar fixture.detectChanges() todavía
+      // Configurar el formulario PRIMERO
+      component.contratoForm.patchValue({
+        cliente_id: '1',
+        unidad_id: '1',
+        tipo_contrato: 'arriendo',
+        fecha_inicio: '2024-01-01',
+        fecha_fin: '2024-12-31',
+        monto_total: 1000,
+        estado: 'activo'
+      });
 
-    expect(contratoServiceSpy.deleteContrato).toHaveBeenCalledWith(5);
+      // Verificar que el formulario sea válido
+      expect(component.contratoForm.valid).toBeTruthy();
+
+      component.crearContrato();
+      tick();
+
+      expect(createContratoSpy).toHaveBeenCalledTimes(1);
+      expect(createContratoSpy).toHaveBeenCalledWith({
+        cliente_id: '1',
+        unidad_id: '1',
+        tipo_contrato: 'arriendo',
+        fecha_inicio: '2024-01-01',
+        fecha_fin: '2024-12-31',
+        monto_total: 1000,
+        estado: 'activo'
+      });
+    }));
+
+    it('should not create contrato if form is invalid', () => {
+      const createContratoSpy = spyOn(contratoService, 'createContrato').and.returnValue(of(mockContratos[0]));
+
+      // Dejar el formulario vacío (inválido)
+      component.contratoForm.reset();
+
+      component.crearContrato();
+
+      expect(createContratoSpy).not.toHaveBeenCalled();
+      expect(component.contratoForm.invalid).toBeTruthy();
+    });
+  });
+
+  describe('eliminarContrato', () => {
+    beforeEach(() => {
+      spyOn(clienteService, 'getClientes').and.returnValue(of(mockClientes));
+      spyOn(unidadService, 'getUnidades').and.returnValue(of(mockUnidades));
+      spyOn(contratoService, 'getContratos').and.returnValue(of(mockContratos));
+      fixture.detectChanges();
+    });
+
+    it('should delete contrato', fakeAsync(() => {
+      spyOn(contratoService, 'deleteContrato').and.returnValue(of({}));
+      spyOn(window, 'confirm').and.returnValue(true);
+      component.eliminarContrato(1);
+      tick();
+      expect(contratoService.deleteContrato).toHaveBeenCalledTimes(1);
+      expect(contratoService.deleteContrato).toHaveBeenCalledWith(1);
+    }));
+
+    it('should handle error on delete contrato', fakeAsync(() => {
+      spyOn(contratoService, 'deleteContrato').and.returnValue(throwError({}));
+      spyOn(window, 'confirm').and.returnValue(true);
+      component.eliminarContrato(1);
+      tick();
+      expect(component.error).toBe('Error eliminando contrato');
+    }));
+  });
+
+  it('should unsubscribe on destroy', () => {
+    spyOn(clienteService, 'getClientes').and.returnValue(of(mockClientes));
+    spyOn(unidadService, 'getUnidades').and.returnValue(of(mockUnidades));
+    spyOn(contratoService, 'getContratos').and.returnValue(of(mockContratos));
+    fixture.detectChanges();
+    const subs = component['subs'];
+    subs.forEach(sub => spyOn(sub, 'unsubscribe'));
+    component.ngOnDestroy();
+    subs.forEach(sub => expect(sub.unsubscribe).toHaveBeenCalledTimes(1));
   });
 });

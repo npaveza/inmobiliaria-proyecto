@@ -37,7 +37,8 @@ export class ContratosComponent implements OnInit, OnDestroy {
       tipo_contrato: ['arriendo', Validators.required],
       fecha_inicio: ['', Validators.required],
       fecha_fin: ['', Validators.required],
-      monto_total: ['', [Validators.required, Validators.min(0)]]
+      monto_total: ['', [Validators.required, Validators.min(0)]],
+      estado: ['activo', Validators.required]
     });
   }
 

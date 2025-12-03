@@ -16,16 +16,6 @@ interface Unidad {
   cliente_id: string;
 }
 
-interface UnidadForm {
-  numero_unidad: string;
-  tipo_unidad: string;
-  metraje: number;
-  precio_venta: number;
-  estado: string;
-  proyecto_id: string;
-  cliente_id: string;
-}
-
 @Component({
   selector: 'app-unidades',
   standalone: true,
@@ -37,85 +27,115 @@ export class UnidadesComponent implements OnInit {
   unidades: Unidad[] = [];
   proyectos: any[] = [];
   clientes: any[] = [];
+
   unidadForm = new FormGroup({
-    numero_unidad: new FormControl('', Validators.required),
-    tipo_unidad: new FormControl('', Validators.required),
-    metraje: new FormControl('', Validators.required),
-    precio_venta: new FormControl('', Validators.required),
-    estado: new FormControl('', Validators.required),
-    proyecto_id: new FormControl('', Validators.required),
-    cliente_id: new FormControl('')
+    numero_unidad: new FormControl<string | null>('', Validators.required),
+    tipo_unidad: new FormControl<string | null>('', Validators.required),
+    metraje: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^[1-9][0-9]*$/)
+    ]),
+    precio_venta: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^[1-9][0-9]*$/)
+    ]),
+    estado: new FormControl<string | null>('', Validators.required),
+    proyecto_id: new FormControl<string | null>('', Validators.required),
+    cliente_id: new FormControl<string | null>('')
   });
+
   mostrarFormulario = false;
   unidadCreada = false;
   unidadEditada = false;
+
   unidadSeleccionada: any = null;
   modoEdicion = false;
 
-  constructor(private unidadService: UnidadService, private proyectoService: ProyectoService, private clienteService: ClienteService) { }
+  constructor(
+    private unidadService: UnidadService,
+    private proyectoService: ProyectoService,
+    private clienteService: ClienteService
+  ) {}
 
   ngOnInit(): void {
     this.unidadService.getUnidades().subscribe(response => {
-      this.unidades = response.data;
+      this.unidades = response.data.map((u: any) => ({
+        ...u,
+        metraje: Number(u.metraje) > 0 ? Number(u.metraje) : 1,
+        precio_venta: Number(u.precio_venta) > 0 ? Number(u.precio_venta) : 1
+      }));
     });
+
     this.proyectoService.getProyectos().subscribe(response => {
       this.proyectos = response.data;
     });
+
     this.clienteService.getClientes().subscribe((response: any) => {
       this.clientes = response.data;
     });
   }
 
   crearUnidad(): void {
-    if (this.unidadForm.valid) {
-      const unidadFormValue = {
-        ...this.unidadForm.value,
-        metraje: Number(this.unidadForm.value.metraje),
-        precio_venta: Number(this.unidadForm.value.precio_venta)
-      } as UnidadForm;
-
-      if (this.modoEdicion) {
-        const unidad: Unidad = {
-          id: this.unidadSeleccionada.id,
-          ...unidadFormValue
-        };
-        this.unidadService.editarUnidad(unidad.id, unidad).subscribe(response => {
-          this.unidadService.getUnidades().subscribe(response => {
-            this.unidades = response.data;
-            this.unidadForm.reset();
-            this.mostrarFormulario = false;
-            this.unidadEditada = true;
-            setTimeout(() => {
-              this.unidadEditada = false;
-            }, 2000);
-          });
-        });
-      } else {
-        const unidad: Unidad = {
-          id: '',
-          ...unidadFormValue
-        };
-        this.unidadService.crearUnidad(unidad).subscribe(response => {
-          this.unidadService.getUnidades().subscribe(response => {
-            this.unidades = response.data;
-            this.unidadForm.reset();
-            this.mostrarFormulario = false;
-            this.unidadCreada = true;
-            setTimeout(() => {
-              this.unidadCreada = false;
-            }, 2000);
-          });
-        });
-      }
-    } else {
+    if (!this.unidadForm.valid) {
       this.unidadForm.markAllAsTouched();
+      alert("Los valores deben ser mayores a 0");
+      return;
     }
+
+    const metraje = Number(this.unidadForm.value.metraje);
+    const precio = Number(this.unidadForm.value.precio_venta);
+
+    if (metraje < 1 || precio < 1 || isNaN(metraje) || isNaN(precio)) {
+      alert("Valores inválidos: deben ser mayores a 0.");
+      return;
+    }
+
+    const unidadData: any = {
+      ...this.unidadForm.value,
+      metraje,
+      precio_venta: precio
+    };
+
+    if (this.modoEdicion) {
+      this.editar(unidadData);
+    } else {
+      this.crear(unidadData);
+    }
+  }
+
+  private crear(unidad: any) {
+    this.unidadService.crearUnidad(unidad).subscribe(() => {
+      this.unidadService.getUnidades().subscribe(response => {
+        this.unidades = response.data;
+        this.unidadForm.reset();
+        this.mostrarFormulario = false;
+        this.unidadCreada = true;
+        setTimeout(() => this.unidadCreada = false, 2000);
+      });
+    });
+  }
+
+  private editar(unidad: any) {
+    const id = this.unidadSeleccionada.id;
+
+    this.unidadService.editarUnidad(id, unidad).subscribe(() => {
+      this.unidadService.getUnidades().subscribe(response => {
+        this.unidades = response.data;
+        this.unidadForm.reset();
+        this.mostrarFormulario = false;
+        this.unidadEditada = true;
+        setTimeout(() => this.unidadEditada = false, 2000);
+      });
+    });
   }
 
   editarUnidad(unidad: any): void {
     this.mostrarFormulario = true;
     this.modoEdicion = true;
     this.unidadSeleccionada = unidad;
+
     this.unidadForm.patchValue({
       numero_unidad: unidad.numero_unidad,
       tipo_unidad: unidad.tipo_unidad,

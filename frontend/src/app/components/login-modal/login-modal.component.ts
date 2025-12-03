@@ -26,8 +26,15 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
+
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
     const email = this.loginForm.value.email ?? '';
     const password = this.loginForm.value.password ?? '';
+
     this.authService.login(email, password)
       .subscribe({
         next: (response: any) => {
@@ -43,6 +50,7 @@ export class LoginComponent implements OnInit {
         }
       });
   }
+
 
   closeModal(): void {
     this.activeModal.close();

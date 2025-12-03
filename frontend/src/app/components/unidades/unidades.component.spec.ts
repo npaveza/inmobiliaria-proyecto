@@ -43,9 +43,45 @@ describe('UnidadesComponent', () => {
     proyectoService = TestBed.inject(ProyectoService) as jasmine.SpyObj<ProyectoService>;
     clienteService = TestBed.inject(ClienteService) as jasmine.SpyObj<ClienteService>;
 
-    unidadService.getUnidades.and.returnValue(of({ data: [] }));
-    proyectoService.getProyectos.and.returnValue(of({ data: [] }));
-    clienteService.getClientes.and.returnValue(of([]));
+    // ==== DATOS CORREGIDOS ====
+    unidadService.getUnidades.and.returnValue(
+      of({
+        data: [
+          {
+            id: "1",
+            numero_unidad: "10",
+            tipo_unidad: "Depto",
+            metraje: "40",
+            precio_venta: "70000000",
+            estado: "Disponible",
+            proyecto_id: "1",
+            cliente_id: "1"
+          }
+        ]
+      })
+    );
+
+    proyectoService.getProyectos.and.returnValue(
+      of({
+        data: [{ id: "1", nombre: "Proyecto X" }]
+      })
+    );
+
+    (clienteService.getClientes as jasmine.Spy).and.returnValue(
+      of({
+        data: [
+          {
+            id: "1",
+            rut: "11.111.111-1",
+            nombre: "Test",
+            apellido: "User",
+            email: "test@test.com",
+            telefono: "12345678"
+          }
+        ]
+      }) as any
+    );
+
 
     fixture.detectChanges();
   });
@@ -54,22 +90,23 @@ describe('UnidadesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('debería cargar unidades, proyectos y clientes en ngOnInit', () => {
+  it('ngOnInit debe cargar unidades, proyectos y clientes', () => {
     expect(unidadService.getUnidades).toHaveBeenCalled();
     expect(proyectoService.getProyectos).toHaveBeenCalled();
     expect(clienteService.getClientes).toHaveBeenCalled();
+    expect(component.unidades.length).toBe(1);
   });
 
-  it('debería tener un formulario inválido cuando está vacío', () => {
+  it('debería tener formulario inválido al inicio', () => {
     expect(component.unidadForm.valid).toBeFalse();
   });
 
-  it('debería validar el formulario cuando todos los campos son correctos', () => {
+  it('debería validar correctamente un formulario válido', () => {
     component.unidadForm.setValue({
       numero_unidad: '101',
       tipo_unidad: 'Departamento',
-      metraje: '45',
-      precio_venta: '90000000',
+      metraje: 45,
+      precio_venta: 90000000,
       estado: 'Disponible',
       proyecto_id: '1',
       cliente_id: '1'
@@ -77,14 +114,46 @@ describe('UnidadesComponent', () => {
     expect(component.unidadForm.valid).toBeTrue();
   });
 
-  it('debería crear una unidad cuando el formulario es válido y NO está en modo edición', () => {
+  it('crearUnidad debe llamar alert al intentar enviar formulario inválido', () => {
+    spyOn(window, 'alert');
+    component.unidadForm.patchValue({ numero_unidad: '' });
+
+    component.crearUnidad();
+
+    expect(window.alert).toHaveBeenCalledWith("Los valores deben ser mayores a 0");
+  });
+
+  it('crearUnidad debe rechazar metraje o precio menores a 1', () => {
+    spyOn(window, 'alert');
+
+    component.unidadForm.get('metraje')?.clearValidators();
+    component.unidadForm.get('precio_venta')?.clearValidators();
+    component.unidadForm.updateValueAndValidity();
+
+    component.unidadForm.setValue({
+      numero_unidad: '101',
+      tipo_unidad: 'Depto',
+      metraje: 0,
+      precio_venta: 0,
+      estado: 'Disponible',
+      proyecto_id: '1',
+      cliente_id: '1'
+    });
+
+    component.crearUnidad();
+
+    expect(window.alert).toHaveBeenCalledWith("Valores inválidos: deben ser mayores a 0.");
+  });
+
+
+  it('debería crear una unidad si el formulario es válido y no está en modo edición', () => {
     component.modoEdicion = false;
 
     component.unidadForm.setValue({
       numero_unidad: '101',
       tipo_unidad: 'Depto',
-      metraje: '50',
-      precio_venta: '100000000',
+      metraje: 50,
+      precio_venta: 100000000,
       estado: 'Disponible',
       proyecto_id: '1',
       cliente_id: '1'
@@ -106,8 +175,8 @@ describe('UnidadesComponent', () => {
     component.unidadForm.setValue({
       numero_unidad: '102',
       tipo_unidad: 'Casa',
-      metraje: '70',
-      precio_venta: '150000000',
+      metraje: 70,
+      precio_venta: 150000000,
       estado: 'Vendido',
       proyecto_id: '2',
       cliente_id: '2'
@@ -121,7 +190,7 @@ describe('UnidadesComponent', () => {
     expect(unidadService.editarUnidad).toHaveBeenCalledWith('10', jasmine.any(Object));
   });
 
-  it('debería preparar el formulario para edición cuando se llama editarUnidad', () => {
+  it('editarUnidad debe activar modo edición y cargar los valores en el formulario', () => {
     const unidad = {
       id: '20',
       numero_unidad: '301',
@@ -151,13 +220,11 @@ describe('UnidadesComponent', () => {
     expect(unidadService.eliminarUnidad).toHaveBeenCalledWith('10');
   });
 
-  it('getProyectoNombre debería devolver el nombre del proyecto', () => {
-    component.proyectos = [{ id: '1', nombre: 'Proyecto X' }];
+  it('getProyectoNombre debe devolver nombre según ID', () => {
     expect(component.getProyectoNombre('1')).toBe('Proyecto X');
   });
 
-  it('getClienteRut debería devolver el rut del cliente', () => {
-    component.clientes = [{ id: '1', rut: '11.111.111-1' }];
+  it('getClienteRut debe devolver rut según ID', () => {
     expect(component.getClienteRut('1')).toBe('11.111.111-1');
   });
 });

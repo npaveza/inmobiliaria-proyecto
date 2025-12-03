@@ -19,8 +19,8 @@
                     <tr *ngFor="let unidad of unidades">
                         <td>{{ unidad.numero_unidad }}</td>
                         <td>{{ unidad.tipo_unidad }}</td>
-                        <td>{{ unidad.metraje }}</td>
-                        <td>{{ unidad.precio_venta }}</td>
+                        <td>{{ unidad.metraje | number:'1.0-0' }}</td>
+                        <td>{{ unidad.precio_venta | number:'1.0-0' }}</td>
                         <td>{{ unidad.estado }}</td>
                         <td>{{ getProyectoNombre(unidad.proyecto_id) }}</td>
                         <td>{{ getClienteRut(unidad.cliente_id) }}</td>
@@ -52,11 +52,11 @@
                     </div>
                     <div class="form-group">
                         <label>Metraje:</label>
-                        <input formControlName="metraje" type="number" class="form-control">
+                        <input formControlName="metraje" type="number" class="form-control" min="1">
                     </div>
                     <div class="form-group">
                         <label>Precio de venta:</label>
-                        <input formControlName="precio_venta" type="number" class="form-control">
+                        <input formControlName="precio_venta" type="number" class="form-control" min="1000000">
                     </div>
                     <div class="form-group">
                         <label>Estado:</label>
